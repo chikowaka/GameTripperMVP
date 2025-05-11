@@ -1,28 +1,38 @@
 // src/lib/store/ramenStore.ts
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export type RamenEntry = {
   id: string
-  image: string // base64形式
-  member: string
+  image: string
+  eater: string
   shop: string
-  result: '完食' | 'ギブアップ'
+  result?: string
 }
 
-type RamenStore = {
-  ramenList: RamenEntry[]
+type RamenState = {
+  ramens: RamenEntry[]
   addRamen: (entry: RamenEntry) => void
   updateRamen: (entry: RamenEntry) => void
 }
 
-export const useRamenStore = create<RamenStore>((set) => ({
-  ramenList: [],
-  addRamen: (entry) =>
-    set((state) => ({
-      ramenList: [...state.ramenList, entry],
-    })),
-  updateRamen: (entry) =>
-    set((state) => ({
-      ramenList: state.ramenList.map((e) => (e.id === entry.id ? entry : e)),
-    })),
-}))
+export const useRamenStore = create<RamenState>()(
+  persist(
+    (set) => ({
+      ramens: [],
+      addRamen: (entry) =>
+        set((state) => ({
+          ramens: [...state.ramens, entry],
+        })),
+      updateRamen: (entry) =>
+        set((state) => ({
+          ramens: state.ramens.map((r) =>
+            r.id === entry.id ? entry : r
+          ),
+        })),
+    }),
+    {
+      name: 'ramen-store', // localStorageのキー名
+    }
+  )
+)

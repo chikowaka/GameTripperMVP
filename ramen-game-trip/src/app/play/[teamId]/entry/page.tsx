@@ -1,128 +1,124 @@
 'use client'
 
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useTeamStore } from '@/lib/store/teamStore'
+import { useSearchParams, useRouter, useParams } from 'next/navigation'
 import { useRamenStore } from '@/lib/store/ramenStore'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { v4 as uuidv4 } from 'uuid'
 
-export default function EntryPage({ params }: { params: { teamId: string } }) {
-  const router = useRouter()
+export default function RamenEntryPage() {
   const searchParams = useSearchParams()
-  const id = searchParams.get('id') ?? ''
+  const router = useRouter()
+  const params = useParams()
+  const teamId = params?.teamId as string
+  const ramenId = searchParams.get('id')
+  const { ramens = [], updateRamen } = useRamenStore()
 
-  const { members } = useTeamStore()
-  const { ramenList, addRamen, updateRamen } = useRamenStore()
+  const [ramen, setRamen] = useState(null)
+  const [image, setImage] = useState<string | null>(null)
+  const [eater, setEater] = useState('')
+  const [shop, setShop] = useState('')
 
-  const existingEntry = ramenList.find((entry) => entry.id === id)
+  useEffect(() => {
+    if (ramenId && ramens.length > 0) {
+      const found = ramens.find(r => r.id === ramenId)
+      if (found) {
+        setRamen(found)
+        setImage(found.image || null)
+        setEater(found.eater || '')
+        setShop(found.shop || '')
+      }
+    }
+  }, [ramens, ramenId])
 
-  const [image, setImage] = useState(existingEntry?.image || '')
-  const [member, setMember] = useState(existingEntry?.member || '')
-  const [shop, setShop] = useState(existingEntry?.shop || '')
-  const [result, setResult] = useState<'完食' | 'ギブアップ'>(existingEntry?.result || '完食')
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
     const reader = new FileReader()
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setImage(reader.result)
-      }
+    reader.onloadend = () => {
+      setImage(reader.result as string)
     }
     reader.readAsDataURL(file)
   }
 
-  const handleSubmit = () => {
-    const entry = {
-      id: id || uuidv4(),
-      image,
-      member,
-      shop,
-      result,
-    }
-    if (id) {
-      updateRamen(entry)
-    } else {
-      addRamen(entry)
-    }
-    router.push(`/play/${params.teamId}`)
+  const handleResult = (result: '完食' | 'ギブアップ') => {
+    if (!ramen) return
+    updateRamen({ ...ramen, image, eater, shop, result })
+    if (result === '完食') router.push(`/play/${teamId}/entry?id=${ramen.id}`)
+  }
+
+  const handleBack = () => {
+    if (!ramen) return
+    updateRamen({ ...ramen, image, eater, shop })
+    router.push(`/play/${teamId}`)
   }
 
   return (
-    <div className="p-4 max-w-xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold text-center text-black">ラーメン記録</h1>
+    <div className="max-w-md mx-auto px-4 py-6">
+      <h1 className="text-2xl font-bold text-center mb-6">ラーメン編集画面</h1>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-black">写真をアップロード</label>
-        <input type="file" accept="image/*" onChange={handleImageChange} />
-        {image && (
-          <Image
-            src={image}
-            alt="ラーメン画像"
-            width={300}
-            height={200}
-            className="rounded mt-2"
-          />
-        )}
-      </div>
+      {image ? (
+        <Image
+          src={image}
+          alt="Ramen"
+          width={200}
+          height={200}
+          className="mx-auto rounded-md mb-4"
+        />
+      ) : (
+        <div className="w-full text-center text-gray-500 mb-4">画像がありません</div>
+      )}
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-black">食べた人</label>
-        <select
-          value={member}
-          onChange={(e) => setMember(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded text-black"
-        >
-          <option value="">選択してください</option>
-          {members.map((m, index) => (
-            <option key={index} value={m.name}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-black">ラーメン店名</label>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">画像をアップロード</label>
         <input
-          type="text"
-          value={shop}
-          onChange={(e) => setShop(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded text-black"
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-black">結果</label>
-        <div className="flex flex-col gap-2">
-          <Button
-            onClick={() => {
-              setResult('完食')
-              handleSubmit()
-            }}
-            className="bg-green-500 hover:bg-green-600 text-white"
-          >
-            完食
-          </Button>
-          <Button
-            onClick={() => {
-              setResult('ギブアップ')
-              handleSubmit()
-            }}
-            className="bg-red-500 hover:bg-red-600 text-white"
-          >
-            ギブアップ
-          </Button>
+      <div className="mb-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">食べる人</label>
+          <input
+            type="text"
+            value={eater}
+            onChange={(e) => setEater(e.target.value)}
+            className="w-full border rounded px-3 py-2 bg-white text-black"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">ラーメン店名</label>
+          <input
+            type="text"
+            value={shop}
+            onChange={(e) => setShop(e.target.value)}
+            className="w-full border rounded px-3 py-2 bg-white text-black"
+          />
         </div>
       </div>
 
-      <div className="pt-4 text-center">
+      <div className="flex flex-col items-center gap-4">
+        <Button
+          className="w-full max-w-sm text-lg py-6"
+          onClick={() => handleResult('完食')}
+        >
+          完食
+        </Button>
+        <Button
+          variant="secondary"
+          className="w-full max-w-sm text-lg py-6"
+          onClick={() => handleResult('ギブアップ')}
+        >
+          ギブアップ
+        </Button>
         <Button
           variant="outline"
-          onClick={() => router.push(`/play/${params.teamId}`)}
+          className="w-full max-w-sm text-lg py-6"
+          onClick={handleBack}
         >
           もどる
         </Button>
