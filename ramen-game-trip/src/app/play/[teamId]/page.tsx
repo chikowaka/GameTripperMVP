@@ -11,14 +11,14 @@ import { useState } from 'react'
 export default function PlayTopPage({ params }: { params: { teamId: string } }) {
   const router = useRouter()
   const { members } = useTeamStore()
-  const { ramenList: ramens = [], addRamen } = useRamenStore()
+  const { ramens = [], addRamen } = useRamenStore()
   const [showForm, setShowForm] = useState(false)
   const [eater, setEater] = useState('')
   const [shop, setShop] = useState('')
 
   const handleAddRamen = () => {
     if (eater && shop) {
-      addRamen({ eater, shop, image: '' })
+      addRamen({ id, eater, shop, image: '' })
       setEater('')
       setShop('')
       setShowForm(false)
@@ -38,8 +38,8 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
           <div key={index} className="flex flex-col items-center">
             <div className="text-black text-sm font-bold mb-1">{member.ramenCount ?? 0}杯</div>
             <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-              {member.image ? (
-                <Image src={member.image} alt={member.name} width={48} height={48} />
+              {member.icon ? (
+                <Image src={member.icon} alt={member.name} width={48} height={48} />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">
                   <UserRoundPlus size={24} />
@@ -59,23 +59,25 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
         {ramens.map((ramen, index) => (
           <div
             key={index}
-            className="flex items-center bg-yellow-100 rounded-xl shadow-md p-3 cursor-pointer hover:opacity-90"
+            className="relative flex items-center justify-between bg-yellow-100 rounded-xl shadow-md p-3 cursor-pointer hover:opacity-90"
             onClick={() => router.push(`/play/${params.teamId}/entry?id=${index}`)}
           >
-            <div className="w-12 h-12 rounded-full overflow-hidden mr-3 bg-gray-200">
-              {ramen.image ? (
-                <Image src={ramen.image} alt="ramen" width={48} height={48} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  <Soup size={24} />
-                </div>
-              )}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                {ramen.image ? (
+                  <Image src={ramen.image} alt="ramen" width={48} height={48} />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <Soup size={24} />
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="text-black font-bold">{ramen.eater}</div>
+                <div className="text-black">{ramen.shop}</div>
+              </div>
             </div>
-            <div className="text-black font-bold mr-2">{ramen.eater}</div>
-            <div className="text-black">{ramen.shop}</div>
-            <div className="mr-2 text-gray-600">
-              <Pencil className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            </div>
+            <Pencil className="w-5 h-5 text-gray-500" />
           </div>
         ))}
       </div>
