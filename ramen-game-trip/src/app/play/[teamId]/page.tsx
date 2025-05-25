@@ -18,7 +18,7 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
 
   const handleAddRamen = () => {
     if (eater && shop) {
-      addRamen({ id, eater, shop, image: '' })
+      addRamen({ id: Date.now().toString(), eater, shop, image: '' })
       setEater('')
       setShop('')
       setShowForm(false)
@@ -34,21 +34,24 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
 
       {/* メンバー一覧 */}
       <div className="flex gap-4 mb-6">
-        {members.map((member, index) => (
-          <div key={index} className="flex flex-col items-center">
-            <div className="text-black text-sm font-bold mb-1">{member.ramenCount ?? 0}杯</div>
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-              {member.icon ? (
-                <Image src={member.icon} alt={member.name} width={48} height={48} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  <UserRoundPlus size={24} />
-                </div>
-              )}
+        {members.map((member, index) => {
+          const count = ramens.filter((r) => r.eater === member.name).length
+          return (
+            <div key={index} className="flex flex-col items-center">
+              <div className="text-black text-sm font-bold mb-1">{count}杯</div>
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                {member.icon ? (
+                  <Image src={member.icon} alt={member.name} width={48} height={48} />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <UserRoundPlus size={24} />
+                  </div>
+                )}
+              </div>
+              <div className="text-black text-xs mt-1">{member.name}</div>
             </div>
-            <div className="text-black text-xs mt-1">{member.name}</div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* ラーメンリストタイトル */}
@@ -124,132 +127,3 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
     </main>
   )
 }
-
-
-
-
-// 'use client'
-
-// import { useRouter } from 'next/navigation'
-// import { useTeamStore } from '@/lib/store/teamStore'
-// import { useRamenStore } from '@/lib/store/ramenStore'
-// import { Button } from '@/components/ui/button'
-// import { PlusIcon, Soup, UserRoundPlus, Pencil } from 'lucide-react'
-// import Image from 'next/image'
-// import { useState } from 'react'
-
-// export default function PlayTopPage({ params }: { params: { teamId: string } }) {
-//   const router = useRouter()
-//   const { members } = useTeamStore()
-//   const { ramenList: ramens, addRamen } = useRamenStore()
-//   const [showForm, setShowForm] = useState(false)
-//   const [eater, setEater] = useState('')
-//   const [shop, setShop] = useState('')
-
-//   const handleAddRamen = () => {
-//     if (eater && shop) {
-//       addRamen({ eater, shop, image: '' })
-//       setEater('')
-//       setShop('')
-//       setShowForm(false)
-//     }
-//   }
-
-//   return (
-//     <main className="flex flex-col items-center min-h-screen bg-white p-4">
-//       <h1 className="text-2xl font-bold text-center mb-4">
-//         <span className="text-red-500">ラーメン</span>
-//         <span className="text-blue-500">はしご旅</span>
-//       </h1>
-
-//       {/* メンバー一覧 */}
-//       <div className="flex gap-4 mb-6">
-//         {members.map((member, index) => (
-//           <div key={index} className="flex flex-col items-center">
-//             <div className="text-black text-sm font-bold mb-1">{member.count ?? 0}杯</div>
-//             <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-//               {member.image ? (
-//                 <Image src={member.image} alt={member.name} width={48} height={48} />
-//               ) : (
-//                 <div className="flex items-center justify-center h-full text-gray-500">
-//                   <UserRoundPlus size={24} />
-//                 </div>
-//               )}
-//             </div>
-//             <div className="text-black text-xs mt-1">{member.name}</div>
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* ラーメンリストタイトル */}
-//       <h2 className="text-lg font-semibold text-black mb-2">ラーメンリスト</h2>
-
-//       {/* ラーメンリスト */}
-//       <div className="w-full max-w-md space-y-2 mb-6">
-//         {ramens.map((ramen, index) => (
-//           <div
-//             key={index}
-//             className="flex items-center bg-yellow-100 rounded-xl shadow-md p-3 cursor-pointer hover:opacity-90"
-//             onClick={() => router.push(`/play/${params.teamId}/entry?id=${index}`)}
-//           >
-//             <div className="w-12 h-12 rounded-full overflow-hidden mr-3 bg-gray-200">
-//               {ramen.image ? (
-//                 <Image src={ramen.image} alt="ramen" width={48} height={48} />
-//               ) : (
-//                 <div className="flex items-center justify-center h-full text-gray-500">
-//                   <Soup size={24} />
-//                 </div>
-//               )}
-//             </div>
-//             <div className="text-black font-bold mr-2">{ramen.eater}</div>
-//             <div className="text-black">{ramen.shop}</div>
-//             <div className="mr-2 text-gray-600">
-//               <Pencil size={20} />
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* ラーメン追加ボタン */}
-//       <Button onClick={() => setShowForm(true)} className="bg-blue-300 text-black px-6 py-2 rounded-full">
-//         <PlusIcon className="mr-2" /> ラーメンを追加
-//       </Button>
-
-//       {/* フォームドロワー */}
-//       {showForm && (
-//         <div className="fixed inset-0 bg-black/70 bg-opacity-40 flex items-end justify-center z-50">
-//           <div className="bg-white w-full max-w-md p-6 rounded-t-2xl shadow-lg">
-//             <h3 className="text-xl font-bold text-center mb-4">ラーメン追加フォーム</h3>
-//             <div className="mb-4">
-//               <label className="block text-black mb-1">食べる人</label>
-//               <select
-//                 value={eater}
-//                 onChange={(e) => setEater(e.target.value)}
-//                 className="w-full p-2 border rounded text-black"
-//               >
-//                 <option value="">選択してください</option>
-//                 {members.map((m, i) => (
-//                   <option key={i} value={m.name}>{m.name}</option>
-//                 ))}
-//               </select>
-//             </div>
-//             <div className="mb-6">
-//               <label className="block text-black mb-1">ラーメン店名</label>
-//               <input
-//                 value={shop}
-//                 onChange={(e) => setShop(e.target.value)}
-//                 className="w-full p-2 border rounded text-black"
-//                 placeholder="ラーメン屋の名前"
-//               />
-//             </div>
-//             <div className="flex gap-4">
-//               <Button onClick={handleAddRamen} className="flex-1 bg-green-500 text-white">完了</Button>
-//               <Button onClick={() => setShowForm(false)} className="flex-1 bg-gray-300 text-black">キャンセル</Button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </main>
-//   )
-// }
-
