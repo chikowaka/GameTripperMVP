@@ -8,7 +8,7 @@ import { PlusIcon, Soup, UserRoundPlus, Pencil, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 
-export default function PlayTopPage({ params }: { params: { teamId: string } }) {
+export default function PlayTopPage({ params }: { params: Promise<{ teamId: string }> }) {
   const router = useRouter()
   const { members } = useTeamStore()
   const { ramens = [], addRamen, removeRamen } = useRamenStore()
@@ -43,7 +43,7 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
     console.log(index)
   }
 
-  const handleTouchEnd = (e: React.TouchEvent, index: number) => {
+  const handleTouchEnd = async (e: React.TouchEvent, index: number) => {
     if (startXRef.current === null) return
     const endX = e.changedTouches[0].clientX
     const diffX = startXRef.current - endX
@@ -53,7 +53,7 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
     } else if (diffX < -30 && swipedIndex === index) {
       setSwipedIndex(null) // 右スワイプで戻す
     } else {
-      router.push(`/play/${params.teamId}/entry?id=${ramens[index].id}`)
+      router.push(`/play/${(await params).teamId}/entry?id=${ramens[index].id}`)
     }
     startXRef.current = null
   }
