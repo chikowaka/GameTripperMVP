@@ -46,7 +46,11 @@ export default function RamenEntryPage() {
   const handleResult = (result: '完食' | 'ギブアップ') => {
     if (!ramen) return
     updateRamen({ ...ramen, image, eater, shop, result })
-    if (result === '完食') router.push(`/play/${teamId}/entry?id=${ramen.id}`)
+    if (result === '完食') {
+      router.push(`/play/${teamId}`)
+    } else if (result === 'ギブアップ') {
+      router.push(`/play/${teamId}/result/page.tsx`)
+    }
   }
 
   const handleBack = () => {
