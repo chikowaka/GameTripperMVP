@@ -40,6 +40,7 @@ export default function PlayTopPage({ params }: { params: { teamId: string } }) 
 
   const handleTouchStart = (e: React.TouchEvent, index: number) => {
     startXRef.current = e.touches[0].clientX
+    console.log(index)
   }
 
   const handleTouchEnd = (e: React.TouchEvent, index: number) => {
