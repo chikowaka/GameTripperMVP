@@ -20,7 +20,6 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
   const [swipedIndex, setSwipedIndex] = useState<number | null>(null)
   const startXRef = useRef<number | null>(null)
 
-  // スワイプ外タップで戻すためのイベントリスナー登録
   useEffect(() => {
     const handleOutsideClick = () => {
       if (swipedIndex !== null) setSwipedIndex(null)
@@ -51,7 +50,7 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
     if (diffX > 30) {
       setSwipedIndex(index)
     } else if (diffX < -30 && swipedIndex === index) {
-      setSwipedIndex(null) // 右スワイプで戻す
+      setSwipedIndex(null)
     } else {
       router.push(`/play/${(await params).teamId}/entry?id=${ramens[index].id}`)
     }
@@ -62,7 +61,6 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
     <main
       className="flex flex-col items-center min-h-screen bg-white p-4"
       onClick={(e) => {
-        // リスト外クリックで戻す（バブリング対策に target を確認）
         if ((e.target as HTMLElement).closest('.ramen-item') === null) {
           setSwipedIndex(null)
         }
@@ -75,7 +73,7 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
 
       <div className="flex gap-4 mb-6">
         {members.map((member, index) => {
-          const count = ramens.filter((r) => r.eater === member.name).length
+          const count = ramens.filter((r) => r.eater === member.name && r.result === '完食').length
           return (
             <div key={index} className="flex flex-col items-center">
               <div className="text-black text-sm font-bold mb-1">{count}杯</div>
@@ -100,7 +98,7 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
         {ramens.map((ramen, index) => (
           <div key={index} className="relative ramen-item">
             <div
-              className={`flex items-center justify-between bg-yellow-100 rounded-xl shadow-md p-3 transition-transform duration-300 cursor-pointer hover:opacity-90 ${swipedIndex === index ? '-translate-x-20' : 'translate-x-0'}`}
+              className={`flex items-center justify-between ${ramen.result === '完食' ? 'bg-gray-300' : 'bg-yellow-100'} rounded-xl shadow-md p-3 transition-transform duration-300 cursor-pointer hover:opacity-90 ${swipedIndex === index ? '-translate-x-20' : 'translate-x-0'}`}
               onTouchStart={(e) => handleTouchStart(e, index)}
               onTouchEnd={(e) => handleTouchEnd(e, index)}
             >
