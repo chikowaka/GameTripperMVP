@@ -5,6 +5,7 @@ import { useRamenStore } from '@/lib/store/ramenStore'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import type { RamenEntry } from '@/lib/store/ramenStore'
 
 export default function RamenEntryPage() {
   const searchParams = useSearchParams()
@@ -14,8 +15,8 @@ export default function RamenEntryPage() {
   const ramenId = searchParams.get('id')
   const { ramens = [], updateRamen } = useRamenStore()
 
-  const [ramen, setRamen] = useState(null)
-  const [image, setImage] = useState<string | null>(null)
+  const [ramen, setRamen] = useState<RamenEntry | null>(null)
+  const [image, setImage] = useState<string>('')
   const [eater, setEater] = useState('')
   const [shop, setShop] = useState('')
 
@@ -24,7 +25,7 @@ export default function RamenEntryPage() {
       const found = ramens.find(r => r.id === ramenId)
       if (found) {
         setRamen(found)
-        setImage(found.image || null)
+        setImage(found.image || '')
         setEater(found.eater || '')
         setShop(found.shop || '')
       }
