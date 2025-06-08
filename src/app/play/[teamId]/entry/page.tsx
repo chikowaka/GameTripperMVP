@@ -49,7 +49,7 @@ export default function RamenEntryPage() {
     if (result === '完食') {
       router.push(`/play/${teamId}`)
     } else if (result === 'ギブアップ') {
-      router.push(`/play/${teamId}/result/page.tsx`)
+      router.push(`/play/${teamId}`)
     }
   }
 
