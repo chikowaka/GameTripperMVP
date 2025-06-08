@@ -139,7 +139,7 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
       </Button>
 
       {allResultsFilled && hasGiveUp && (
-        <Button onClick={async () => router.push(`/play/${(await params).teamId}/results`)} className="bg-orange-400 text-black px-6 py-2 rounded-full mt-3">
+        <Button onClick={async () => router.push(`/play/${(await params).teamId}/result/`)} className="bg-orange-400 text-black px-6 py-2 rounded-full mt-3">
           結果発表
         </Button>
       )}
