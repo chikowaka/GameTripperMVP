@@ -56,7 +56,7 @@ export default function CreateTaskPage() {
             </div>
             <div className="text-center text-xl font-bold text-red-700 mb-2">【罰ゲーム】</div>
             <div className="text-center text-black text-lg font-medium mb-3">
-              {l.name}：{penalty?.trim() || '罰ゲーム未定'}
+              {penalty?.trim() || '罰ゲーム未定'}
             </div>
             {renderMember(l, true)}
           </div>
@@ -67,6 +67,20 @@ export default function CreateTaskPage() {
         {others.map((o, i) => (
           <div key={i}>{renderMember(o)}</div>
         ))}
+      </div>
+      <div className="mt-10 w-full max-w-md">
+        <button
+          onClick={() => {
+            const confirmed = window.confirm('ゲームを終了しますか？（ラーメンの記録がすべて破棄されます）')
+            if (confirmed) {
+              localStorage.removeItem('ramen-store')
+              window.location.href = '/team/create'
+            }
+          }}
+          className="bg-gray-600 hover:bg-gray-700 text-white w-full py-3 rounded-lg"
+        >
+          ゲーム終了
+        </button>
       </div>
     </main>
   )

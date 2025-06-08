@@ -4,31 +4,27 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTeamStore } from '@/lib/store/teamStore'; 
 
-
 export default function CreateTeamPage() {
   const [teamName, setTeamName] = useState('');
   const [password, setPassword] = useState('');
+  const [penalty, setPenaltyInput] = useState('');
   const router = useRouter();
 
-
   const setTeamNameGlobal = useTeamStore((state) => state.setTeamName);
+  const setPenalty = useTeamStore((state) => state.setPenalty);
 
   const handleCreateTeam = () => {
-    if (!teamName || !password) {
-      alert('チーム名とパスワードを入力してください');
+    if (!teamName || !penalty) {
+      alert('チーム名と罰ゲームを入力してください');
       return;
     }
 
     setTeamNameGlobal(teamName); // グローバルに保存
+    setPenalty(penalty);
 
-    // MVPでは仮チームIDを生成（UUIDなど）
     const teamId = encodeURIComponent(teamName.trim().replace(/\s+/g, '-').toLowerCase());
-
-    // Zustand等で保存する想定。ここでは画面遷移のみ
     router.push(`/team/${teamId}/lobby`);
   };
-
-  
 
   return (
     <main className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
@@ -43,11 +39,19 @@ export default function CreateTeamPage() {
           className="border border-gray-300 rounded-lg px-4 py-2"
         />
 
-        <input
+        {/* <input
           type="password"
           placeholder="パスワード"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-2"
+        /> */}
+
+        <input
+          type="text"
+          placeholder="罰ゲーム"
+          value={penalty}
+          onChange={(e) => setPenaltyInput(e.target.value)}
           className="border border-gray-300 rounded-lg px-4 py-2"
         />
 
@@ -68,3 +72,4 @@ export default function CreateTeamPage() {
     </main>
   );
 }
+
