@@ -12,7 +12,9 @@ type Member = {
 type TeamState = {
   teamName: string
   members: Member[]
+  penalty: string
   setTeamName: (name: string) => void
+  setPenalty: (penalty: string) => void
   addMember: (member: Member) => void
   removeMember: (name: string) => void
   resetTeam: () => void
@@ -23,27 +25,32 @@ export const useTeamStore = create<TeamState>()(
     (set) => ({
       teamName: '',
       members: [],
+      penalty: '',
       setTeamName: (name) => set({ teamName: name }),
+      setPenalty: (penalty) => set({ penalty }),
       addMember: (member) =>
-        set((state) => ({ members: [...state.members, 
-          {
-            ...member,
-            color: member.color ?? getRandomColor(), // すでにcolorがあればそれを使う、なければランダム色
-          },
-        ] })),
+        set((state) => ({
+          members: [
+            ...state.members,
+            {
+              ...member,
+              color: member.color ?? getRandomColor(),
+            },
+          ],
+        })),
       removeMember: (name: string) =>
         set((state) => ({
           members: state.members.filter((member) => member.name !== name),
         })),
-      resetTeam: () => set({ teamName: '', members: [] }),
+      resetTeam: () => set({ teamName: '', members: [], penalty: '' }),
     }),
     {
-      name: 'team-store', // localStorage に保存されるキー名
+      name: 'team-store',
     }
   )
 )
 
-const colors = ['bg-pink-300', 'bg-yellow-200', 'bg-blue-200', 'bg-green-200'];
+const colors = ['bg-pink-300', 'bg-yellow-200', 'bg-blue-200', 'bg-green-200']
 function getRandomColor() {
-  return colors[Math.floor(Math.random() * colors.length)];
+  return colors[Math.floor(Math.random() * colors.length)]
 }

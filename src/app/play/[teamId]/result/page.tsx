@@ -8,7 +8,7 @@ import { UserRoundPlus } from 'lucide-react'
 
 export default function CreateTaskPage() {
   const { ramens } = useRamenStore()
-  const { members } = useTeamStore()
+  const { members, penalty } = useTeamStore()
   const [losers, setLosers] = useState<{ name: string; count: number; icon?: string }[]>([])
   const [others, setOthers] = useState<{ name: string; count: number; icon?: string }[]>([])
 
@@ -53,6 +53,10 @@ export default function CreateTaskPage() {
           <div key={i} className="relative border-2 border-red-400 bg-red-100 rounded-lg shadow-lg p-2">
             <div className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-br-lg">
               敗者
+            </div>
+            <div className="text-center text-xl font-bold text-red-700 mb-2">【罰ゲーム】</div>
+            <div className="text-center text-black text-lg font-medium mb-3">
+              {l.name}：{penalty?.trim() || '罰ゲーム未定'}
             </div>
             {renderMember(l, true)}
           </div>
