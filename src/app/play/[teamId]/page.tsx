@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { PlusIcon, Soup, UserRoundPlus, Pencil, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
+import { getImage } from '@/lib/db/imageDB'
 
 export default function PlayTopPage({ params }: { params: Promise<{ teamId: string }> }) {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
   const [shop, setShop] = useState('')
 
   const [swipedIndex, setSwipedIndex] = useState<number | null>(null)
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({})
   const startXRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -27,6 +29,26 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
     document.addEventListener('click', handleOutsideClick)
     return () => document.removeEventListener('click', handleOutsideClick)
   }, [swipedIndex])
+
+  useEffect(() => {
+    const loadImages = async () => {
+      console.log('開始: ramen画像の読み込み')
+      const urlMap: Record<string, string> = {}
+      for (const ramen of ramens) {
+        console.log('処理中: ramen', ramen.id, 'image:', ramen.image)
+        if (ramen.image) {
+          const blob = await getImage(ramen.image)
+          if (blob) {
+          console.log('画像読み込み成功:', ramen.id)
+            urlMap[ramen.id] = URL.createObjectURL(blob)
+          }
+        }
+      }
+      console.log('画像URLマップ:', urlMap)
+      setImageUrls(urlMap)
+    }
+    loadImages()
+  }, [ramens])
 
   const handleAddRamen = () => {
     if (eater && shop) {
@@ -107,8 +129,8 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
             >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-                  {ramen.image ? (
-                    <Image src={ramen.image} alt="ramen" width={48} height={48} />
+                  {imageUrls[ramen.id] ? (
+                    <Image src={imageUrls[ramen.id]} alt="ramen" width={48} height={48} />
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-500">
                       <Soup size={24} />
@@ -139,7 +161,7 @@ export default function PlayTopPage({ params }: { params: Promise<{ teamId: stri
       </Button>
 
       {allResultsFilled && hasGiveUp && (
-        <Button onClick={async () => router.push(`/play/${(await params).teamId}/result/`)} className="bg-orange-400 text-black px-6 py-2 rounded-full mt-3">
+        <Button onClick={async () => router.push(`/play/${(await params).teamId}/result`)} className="bg-orange-400 text-black px-6 py-2 rounded-full mt-3">
           結果発表
         </Button>
       )}

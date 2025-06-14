@@ -2,9 +2,11 @@
 
 import { useSearchParams, useRouter, useParams } from 'next/navigation'
 import { useRamenStore } from '@/lib/store/ramenStore'
+import { useTeamStore } from '@/lib/store/teamStore'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { saveImage, getImage } from '@/lib/db/imageDB'
 import type { RamenEntry } from '@/lib/store/ramenStore'
 
 export default function RamenEntryPage() {
@@ -14,6 +16,7 @@ export default function RamenEntryPage() {
   const teamId = params?.teamId as string
   const ramenId = searchParams.get('id')
   const { ramens = [], updateRamen } = useRamenStore()
+  const { members } = useTeamStore()
 
   const [ramen, setRamen] = useState<RamenEntry | null>(null)
   const [image, setImage] = useState<string>('')
@@ -21,41 +24,47 @@ export default function RamenEntryPage() {
   const [shop, setShop] = useState('')
 
   useEffect(() => {
-    if (ramenId && ramens.length > 0) {
-      const found = ramens.find(r => r.id === ramenId)
-      if (found) {
-        setRamen(found)
-        setImage(found.image || '')
-        setEater(found.eater || '')
-        setShop(found.shop || '')
+    const fetchData = async () => {
+      if (ramenId && ramens.length > 0) {
+        const found = ramens.find(r => r.id === ramenId)
+        if (found) {
+          setRamen(found)
+          setEater(found.eater || '')
+          setShop(found.shop || '')
+
+          if (found.image) {
+            const blob = await getImage(found.image)
+            if (blob) {
+              const url = URL.createObjectURL(blob)
+              setImage(url)
+            }
+          }
+        }
       }
     }
+    fetchData()
   }, [ramens, ramenId])
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !ramenId || !ramen) return
 
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setImage(reader.result as string)
-    }
-    reader.readAsDataURL(file)
+    await saveImage(ramenId, file)
+    const url = URL.createObjectURL(file)
+    setImage(url)
+    updateRamen({ ...ramen, image: ramenId ?? '' })
   }
 
   const handleResult = (result: '完食' | 'ギブアップ') => {
     if (!ramen) return
-    updateRamen({ ...ramen, image, eater, shop, result })
-    if (result === '完食') {
-      router.push(`/play/${teamId}`)
-    } else if (result === 'ギブアップ') {
-      router.push(`/play/${teamId}`)
-    }
+    updateRamen({ ...ramen, image: ramenId ?? '', eater, shop, result })
+    if (result === '完食') router.push(`/play/${teamId}`)
+    if (result === 'ギブアップ') router.push(`/play/${teamId}`)
   }
 
   const handleBack = () => {
     if (!ramen) return
-    updateRamen({ ...ramen, image, eater, shop })
+    updateRamen({ ...ramen, image: ramenId ?? '', eater, shop })
     router.push(`/play/${teamId}`)
   }
 
@@ -88,12 +97,16 @@ export default function RamenEntryPage() {
       <div className="mb-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">食べる人</label>
-          <input
-            type="text"
+          <select
             value={eater}
             onChange={(e) => setEater(e.target.value)}
             className="w-full border rounded px-3 py-2 bg-white text-black"
-          />
+          >
+            <option value="">選択してください</option>
+            {members.map((m, i) => (
+              <option key={i} value={m.name}>{m.name}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">ラーメン店名</label>
